@@ -1,0 +1,26 @@
+import socket
+import nmap
+import requests
+from bs4 import BeautifulSoup
+from typing import List, Tuple
+
+# Function to scan open ports using nmap
+def scan_open_ports(target: str, port_range: str = '1-1024') -> List[int]:
+    open_ports = []
+    nm = nmap.PortScanner()
+    nm.scan(target, port_range)
+
+    for host in nm.all_hosts():
+        if nm[host].state() == "up":
+            for proto in nm[host].all_protocols():
+                lport = nm[host][proto].keys()
+                for port in lport:
+                    if nm[host][proto][port]['state'] == 'open':
+                        open_ports.append(port)
+    return open_ports
+
+# Function to check for outdated software versions
+def check_outdated_software(url: str) -> List[str]:
+    outdated_software = []
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
